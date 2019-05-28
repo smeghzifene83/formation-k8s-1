@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simplepod1
+  namespace: tst
+spec:
+  containers:
+  - name: container1
+    image: centos
+    env:
+    - name: MESSAGE
+      value: "Hello Word"
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo '$(MESSAGE)'; sleep 10;done"]
+    resources:  #Si absent: error from server (Forbidden) car ResourceQuota present
+     limits:
+      memory: "200Mi"
+      cpu: "1"
+     requests: 
+      memory: "100Mi"
+      cpu: "0.5"

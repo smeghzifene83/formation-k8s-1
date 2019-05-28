@@ -1,10 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 echo "setup-node hostname=$(hostname) ip=$(hostname -i)"
-export MASTER_PUBLIC_IP=52.47.81.140
+export MASTER_PUBLIC_IP=63.32.144.131
 
-export MY_TOKEN=zx5fx1.16bntqexmica7wyb
+export MY_TOKEN=rcperr.1yqx2bzedn2cmljo
 
-export MY_CA_CERT_HASH=580f958bbc7967a237452e48b66c8f15c50e6c512a26ba3ab6ebcf061322517c
+export MY_CA_CERT_HASH=c7488c49341929544ea2a0ec998627488c5287d91dd51d938b621b3777ec6106
 
 # join the cluster
 echo "$(hostname) join the cluster"

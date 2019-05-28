@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: NetworkPolicy
+metadata:
+   name: policyfrontend
+   namespace: tst
+spec:
+   podSelector:
+      matchLabels:
+         role: backend
+  policyTypes: 
+  -   Ingress 
+  -   Egress 
+  ingress:	 
+   - from:
+      - podSelector:
+         matchLabels:
+            role: db
+   ports:
+      - protocol: TCP
+         port: 6379
+egress: 
+  -   to: 
+    -   ipBlock: 
+        cidr:   10.0.0.0/24 
+    ports: 
+    -   protocol:   TCP 
+      port:   5978
