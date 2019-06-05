@@ -45,7 +45,7 @@ metadata:
    name: Tutorial_point_service
 spec:
    selector:
-      application: “My Application”
+      application: "My Application"
    ClusterIP: 10.3.0.12
    ports:
       -name: http
@@ -83,3 +83,44 @@ spec:
       env: env_name
 ```   
 
+
+## Docker-demo
+
+### ClusterIP
+
+```sh
+# create ClusterIP service
+kubectl apply -f docker-demo-service-ClusterIP.yaml
+
+# get IP
+kubectl get svc -o wide
+# output
+NAME              TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE     SELECTOR
+docker-demo-svc   ClusterIP   10.104.80.36   <none>        8080/TCP   69s     app=docker-demo
+kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP    7h12m   <none>
+
+# Access au service => Loadbalancing entre les pods
+curl <SERVICE_IP>:8080/ping
+{"instance":"docker-demo-77cf445b64-j5s7c","version":"2.0"}
+curl <SERVICE_IP>:8080/ping
+{"instance":"docker-demo-77cf445b64-jxdhh","version":"2.0"}
+curl <SERVICE_IP>:8080/ping
+{"instance":"docker-demo-77cf445b64-t9tdw","version":"2.0"}
+```
+
+### NodePort
+
+```sh
+# create ClusterIP service
+kubectl apply -f docker-demo-service-NodePort.yaml
+
+# get IP
+kubectl get svc -o wide
+# output
+NAME              TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE     SELECTOR
+docker-demo-svc   NodePort    10.104.80.36   <none>        8080:32513/TCP   5m34s   app=docker-demo
+kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          7h16m   <none>
+
+# Access au service depuis un navigateur
+http://NODE_IP:<NODE_PORT>
+```

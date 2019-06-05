@@ -27,7 +27,7 @@ Image: python → l'image que nous allons extraire pour créer le conteneur qui 
 ∙ restartPolicy: Jamais → Cette condition de redémarrage de l'image est donnée comme jamais, ce qui signifie que si le conteneur est tué ou s'il est faux, il ne redémarrera pas tout seul.
 
 
-2/ SCréer un scheduled Job
+2/ Créer un scheduled Job
 ```yaml
 apiVersion: v1
 kind: Job

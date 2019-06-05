@@ -1,5 +1,5 @@
 
-#Controller Deployment
+# Controller Deployment
 
 Bien que les ensembles des Controller aient toujours la capacité de gérer les pods et d’échelonner les instances de certains pods, ils ne peuvent pas effectuer de mise à jour propagée ni d’autres fonctionnalités. La méthode pour créer une application répliquée consiste à utiliser un déploiement, qui à son tour utilise un ReplicaSet. Le Deployment est un objet API de niveau supérieur qui met à jour ses ReplicaSets sous-jacents et leurs Pods de la même manière que kubectl rolling-update .
 
@@ -33,7 +33,7 @@ spec:
 ```bash
 $ kubectl apply -f https://k8s.io/docs/tasks/run-application/deployment.yaml
 ou
-$ kubectl run Name-Pod –image=Image-registry:tag 
+$ kubectl run Name-Pod --image=Image-registry:tag 
 ```
 
 
@@ -50,7 +50,7 @@ $ kubectl rollout status deployment/nginx-deployment
 ```
 Revenir au déploiement précédent
 ```bash
-$ kubectl rollout undo deployment/Deployment –to-revision=2
+$ kubectl rollout undo deployment/Deployment --to-revision=2
 ```
 
 
@@ -79,9 +79,106 @@ $ kubectl scale deployment nginx-deployment --replicas=10
 $  kubectl delete deployment nginx-deployment 
 ```
 
+## Docker-demo
+
+1. Création
+
+```sh
+kubectl apply -f docker-demo-deployment.yaml
+```
+
+2. Affichage des détails
+
+```sh
+kubectl describe deployment docker-demo
+kubectl get all --selector=app=docker-demo -o wide
+```
+
+3. Accès aux pods
+
+```sh
+curl <IP-POD-1>:8080/ping
+{"instance":"docker-demo-99cf445b64-q7yqd","version":"1.0"}
+curl <IP-POD-2>:8080/ping
+curl <IP-POD-3>:8080/ping
+``` 
+
+4. Mise à jour
 
 
-A Voir: 
+```sh
+kubectl apply -f docker-demo-deployment-v2.yaml
+
+# list
+kubectl get all --selector=app=docker-demo -o wide
+
+# Accès au POD
+curl <IP-NEW-POD-1>:8080/ping
+{"instance":"docker-demo-77cf445b64-q7hhd","version":"2.0"}
+
+```
+
+5. historique
+
+```sh
+$ kubectl rollout history deployment docker-demo
+deployment.extensions/docker-demo
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+```
+
+6. rollback
+
+```sh
+kubectl rollout undo deployment docker-demo
+
+# list
+kubectl get all --selector=app=docker-demo -o wide
+
+# Accès au POD
+curl <IP-NEW-POD-1>:8080/ping
+{"instance":"docker-demo-77cb4697ff-795zl","version":"1.0"}
+
+```
+
+7. swith to specific revision
+
+```sh
+
+# list revision history
+kubectl rollout history deployment docker-demo
+deployment.extensions/docker-demo
+REVISION  CHANGE-CAUSE
+2         <none>
+3         <none>
+
+# swith to revision 2
+kubectl rollout undo deployment docker-demo --to-revision=2
+
+# list
+kubectl get all --selector=app=docker-demo -o wide
+
+# Accès au POD
+curl <IP-NEW-POD-1>:8080/ping
+ curl  10.244.1.20:8080/ping
+{"instance":"docker-demo-77cf445b64-jxdhh","version":"2.0"}
+
+```
+
+8. scale
+
+```sh
+ kubectl scale deployment --replicas=5 docker-demo
+
+# list
+kubectl get all --selector=app=docker-demo -o wide
+
+```
+
+
+
+## Pour aller plus loin 
 -comment exécuter une application avec état à instance unique à l'aide de PersistentVolume et d'un déploiement.:
 https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/
 
