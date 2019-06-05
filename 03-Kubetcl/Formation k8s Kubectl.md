@@ -189,3 +189,19 @@ $ kubectl get services --field-selector metadata.namespace!=default
 
 voir: https://kubernetes.io/docs/concepts/overview/object-management-kubectl/overview/
 
+---------------------------------------------------------------------------------------------------------------
+## Migration de commandes
+---------------------------------------------------------------------------------------------------------------
+Migration des commandes impératives vers la configuration d'objet impérative:
+
+1/ Exportez l'objet live dans un fichier de configuration d'objet yaml:
+```bash
+$ kubectl get <kind>/<name> -o yaml --export > xxx.yaml
+```
+
+2/ Modifer manuellement les champs du nouveau fichier.
+
+3/ Pour la gestion d'objet ultérieure, utilisez replace exclusivement: 
+```bash
+$ kubectl replace -f xxx.yaml 
+```

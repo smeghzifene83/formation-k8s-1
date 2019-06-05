@@ -4,7 +4,7 @@ metadata:
   name: docker-demo-ingress
 spec:
   rules:
-  - host: configmap-demo.paas-rancher.onepoint.cloud
+  - host: docker-demo-ingress
     http:
       paths:
       - path: /
