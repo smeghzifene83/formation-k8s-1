@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: docker-demo
-        image: ehazlett/docker-demo
+        image: dmaumenee/docker-demo:1.0
         ports:
         - containerPort: 8080
           name: docker-demo

@@ -1,0 +1,8 @@
+---
+nfs: 
+  path: "/opt/nfs-k8s-pv-provisioner/"
+  server: "192.169.32.20"
+podSecurityPolicy: 
+  enabled: "true"
+storageClass:
+  defaultClass: "true"

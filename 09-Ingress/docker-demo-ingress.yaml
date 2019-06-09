@@ -4,7 +4,7 @@ metadata:
   name: docker-demo-ingress
 spec:
   rules:
-  - host: docker-demo-ingress.192.169.32.20.xip.io
+  - host: docker-demo-ingress.192.169.32.21.xip.io
     http:
       paths:
       - path: /

@@ -2,6 +2,22 @@
 
 ## Nginx
 
+### with custom script
+
+```sh
+# create the namespace
+kubectl create namespace ingress-nginx
+
+kubectl apply -f nginx-IngressControler-custom-config.yaml -n ingress-nginx
+```
+
+error
+```
+F0609 07:35:41.190648       6 main.go:98] No service with name ingress-nginx/default-http-backend found: services "default-http-backend" is forbidden: User "system:serviceaccount:ingress-nginx:default" cannot get resource "services" in API group "" in the namespace "ingress-nginx"
+```
+
+### with official install (with Kustomize)
+
 https://kubernetes.github.io/ingress-nginx/deploy/
 https://github.com/kubernetes/ingress-nginx/blob/master/docs/deploy/index.md
 
