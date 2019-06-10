@@ -16,7 +16,7 @@ Vagrant.configure("2") do |config|
     masterconfig.vm.box = BOX_IMAGE
     masterconfig.vm.network :private_network, ip: "192.169.32.20"
     masterconfig.vm.hostname = "master"
-  
+    masterconfig.ssh.insert_key = false
     masterconfig.vm.provider "virtualbox" do |vb|
       vb.memory = MASTER_MEMORY
       vb.cpus = MASTER_CPUS
@@ -37,7 +37,7 @@ Vagrant.configure("2") do |config|
       nodeconfig.vm.box = BOX_IMAGE
       nodeconfig.vm.network :private_network, ip: "192.169.32.#{i + 20}"
       nodeconfig.vm.hostname = "node#{i}"
-    
+      nodeconfig.ssh.insert_key = false
       nodeconfig.vm.provider "virtualbox" do |vb|
         vb.memory = NODE_MEMORY
         vb.cpus = NODE_CPUS

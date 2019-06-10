@@ -99,13 +99,28 @@ NAME              TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE     SE
 docker-demo-svc   ClusterIP   10.104.80.36   <none>        8080/TCP   69s     app=docker-demo
 kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP    7h12m   <none>
 
-# Access au service => Loadbalancing entre les pods
+# Access au service via IP (depuis une VM du cluster)=> Loadbalancing entre les pods
 curl <SERVICE_IP>:8080/ping
 {"instance":"docker-demo-77cf445b64-j5s7c","version":"2.0"}
 curl <SERVICE_IP>:8080/ping
 {"instance":"docker-demo-77cf445b64-jxdhh","version":"2.0"}
 curl <SERVICE_IP>:8080/ping
 {"instance":"docker-demo-77cf445b64-t9tdw","version":"2.0"}
+
+# Accès au service via DNS Service Name (depuis un POD)
+kubectl exec -it <POD_NAME> sh
+wget -qO- docker-demo-svc:8080/ping
+
+# visualisation de la config de résolution DNS
+more /etc/resolv.conf
+nameserver 10.96.0.10
+search default.svc.cluster.local svc.cluster.local cluster.local gop.link
+
+# Accès au service via DNS Service Name
+# depuis un POD d'un autre namespace il faut utiliser le nom qualifié
+wget -qO- docker-demo-svc.default.svc.cluster.local:8080/ping
+
+
 ```
 
 ### NodePort
