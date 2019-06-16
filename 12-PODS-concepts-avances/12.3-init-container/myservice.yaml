@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: myservice # service qui ne pointe null part juste pour tester l'attente
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9376

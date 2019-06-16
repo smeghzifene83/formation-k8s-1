@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Valeur à adapter !!!!!
 export PUBLIC_IP=63.32.144.131
 
 echo $PUBLIC_IP

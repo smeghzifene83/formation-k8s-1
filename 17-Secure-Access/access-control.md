@@ -78,12 +78,12 @@ USER_NAME=dev1
 kubectl config set-credentials $USER_NAME --client-certificate=$USER_NAME.crt --client-key=$USER_NAME.key --embed-certs=true
 
 # set-contex
-kubectl config set-context $USER_NAME@$CLUSTER_NAME --cluster=$CLUSTER_NAME --user=$USER_NAME --namespace=dev1
+kubectl config set-context $USER_NAME@$CLUSTER_NAME --cluster=$CLUSTER_NAME --user=$USER_NAME --namespace=dev-default
 
 # list contexts
 kubectl config get-contexts
 CURRENT   NAME                          CLUSTER      AUTHINFO           NAMESPACE
-         dev1@kubernetes               kubernetes   dev1               dev1
+         dev1@kubernetes               kubernetes   dev1               dev-default
 *        kubernetes-admin@kubernetes   kubernetes   kubernetes-admin
 ```
 
@@ -93,10 +93,10 @@ The group name "dev" match "O=dev" in subj ```openssl req -new -key dev1.key -ou
 
 ```sh
 # create the namespace
-kubectl create ns dev1
+kubectl create ns dev-default
 
 # use a rolebinding to bind admin role on dev1 namespace for all the members of "dev" group
-kubectl create rolebinding dev-view --clusterrole=admin --group=dev -n dev1
+kubectl create rolebinding dev-admin-dev-default-ns --clusterrole=admin --group=dev -n dev-default
 
 # use a clusterrolebinding to bind view role on all namespaces for all the members of "dev" group
 kubectl create clusterrolebinding dev-view-all-ns --clusterrole=view --group=dev
