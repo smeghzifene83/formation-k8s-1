@@ -53,8 +53,18 @@ $ kubectl delete namespace tst
 $ kubectl api-resources --namespaced=true
 $ kubectl api-resources --namespaced=false
 ```
- 
- 
+
+
+6/ affecter un label à un namespace existant
+```bash
+kubectl label namespace $USER_NAME-default formation=true
+```
+
+7/ lister les ns qui n'ont pas le label formation
+```bash
+kubectl  get ns --selector='!formation'
+```
+
 ---------------------------------------------------------------------------------------------------------------
 ## ResourceQuota:
 ---------------------------------------------------------------------------------------------------------------

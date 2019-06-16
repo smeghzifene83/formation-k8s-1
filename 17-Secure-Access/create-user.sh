@@ -89,6 +89,11 @@ kubectl create ns $USER_NAME-default
 kubectl create ns $USER_NAME-ns1
 kubectl create ns $USER_NAME-ns2
 
+# label user ns
+kubectl label namespace $USER_NAME-default formation=true
+kubectl label namespace $USER_NAME-ns1 formation=true
+kubectl label namespace $USER_NAME-ns2 formation=true
+
 # use a rolebinding to bind admin role on user namespaces for the $USER_NAME 
 kubectl create rolebinding $USER_NAME-admin --clusterrole=admin --user=$USER_NAME -n $USER_NAME-default
 kubectl create rolebinding $USER_NAME-admin --clusterrole=admin --user=$USER_NAME -n $USER_NAME-ns1

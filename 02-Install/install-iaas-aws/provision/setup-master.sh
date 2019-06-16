@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Valeur à adapter !!!!!
-export PUBLIC_IP=63.32.144.131
+export PUBLIC_IP=XX.XX.XX.XX
+
+# exemple export PUBLIC_IP=52.47.59.161
 
 echo $PUBLIC_IP
 
@@ -30,6 +32,8 @@ echo "(3/4) Installing a pod network : $POD_NETWORK"
 
 kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/canal/rbac.yaml
 kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/canal/canal.yaml
+
+
 
 
 # prepare add node https://kubernetes.io/fr/docs/setup/independent/create-cluster-kubeadm/#join-nodes
