@@ -2,3 +2,4 @@
 generated-conf
 /vagrant-k8s-1.14/ubuntu-xenial-16.04-cloudimg-console.log
 /vagrant-k8s/ubuntu-xenial-16.04-cloudimg-console.log
+/02-Install/install-iaas-aws/provision/my-config.conf
