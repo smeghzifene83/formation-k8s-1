@@ -9,7 +9,8 @@ kubectl get all -n ingress-nginx
 ```
 
 Vérification l'ingress controler redirige vers le default backend qui affiche : default backend - 404
+
+```sh
 http://<IP-WORKER-1>
-https://<IP-WORKER-1>
 http://<IP-WORKER-2>
-https://<IP-WORKER-2>
+```
