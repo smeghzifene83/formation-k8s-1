@@ -28,7 +28,7 @@ metadata:
 ```
 
 ```bash
-$ kubectl create –f namespace.yaml 
+$ kubectl create -f namespace.yaml 
 ```
 
 2/ Obtenir des informations sur un namespace:
