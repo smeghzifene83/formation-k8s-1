@@ -19,8 +19,6 @@ $ sudo apt-get install -y nfs-kernel-server
 ```sh
 $ sudo mkdir /opt/nfs-k8s-pv
 $ sudo chmod 777 /opt/nfs-k8s-pv/
-$ sudo bash -c \
-'echo software > /opt/nfs-k8s-pv/hello.txt'
 
 # create an index.html file
 cat << EOF > /opt/nfs-k8s-pv/index.html
@@ -28,19 +26,11 @@ cat << EOF > /opt/nfs-k8s-pv/index.html
 <html>
 <head>
 <title>Welcome to nginx NFS custom page!!</title>
-<style>
-body {
-width: 35em;
-margin: 0 auto;
-font-family: Tahoma, Verdana, Arial, sans-serif;
-}
-</style>
 </head>
 <body>
 <h1>Welcome to nginx NFS custom page!!!!!!!!!!!</h1>
-
 </body>
-</html>                                                                  
+</html>
 EOF
 ```
 
@@ -62,18 +52,13 @@ $ sudo exportfs -ra
 ```sh
 $ sudo apt-get -y install nfs-common
 <output_omitted>
+
+# check the NFS share on  NFS_SRV_HOSTNAME
 # with vagrant : the hostname of the NFS Server is "master"
 vagrant@node1:~$ showmount -e <NFS_SRV_HOSTNAME>
 Export list for master:
 /opt/nfs-k8s-pv *
 
-$ sudo mount <NFS_SRV_IP>:/opt/nfs-k8s-pv /mnt
-# with vagrant : the IP of the NFS Server is : 192.169.32.20 
-$ sudo mount 192.169.32.20:/opt/nfs-k8s-pv /mnt
-
-$ ls -l /mnt
-total 4
--rw-r--r-- 1 root root 9 Sep 28 17:55 hello.txt
 ```
 
 ## Creating a Persistent NFS Volume (PV)
@@ -81,11 +66,11 @@ total 4
 6. Return to the master node and create a YAML file for the object with kind PersistentVolume. Use the hostname of the master server and the directory you created in the previous step. Only syntax is checked, an incorrect name or directory will not generate an error, but a Pod using the resource will not start. Note that the accessModes do not currently affect actual access and are typically used as labels instead.
 
 ```yaml
-$ vim PVol.yaml
+$ vim pv-1.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pvvol-1
+  name: pv-1
 spec:
   capacity:
     storage: 1Gi
@@ -94,19 +79,19 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   nfs:
     path: /opt/nfs-k8s-pv
-    server: 192.169.32.20   #<-- Edit to match master node
+    server: 192.169.32.20   #<-- Edit to match master node  (private IP for AWS)
     readOnly: false
 ```
 
 7. Create the persistent volume, then verify its creation.
 
 ```
-$ kubectl create -f PVol.yaml
-persistentvolume/pvvol-1 created
+$ kubectl apply -f pv-1.yaml
+persistentvolume/pv-1 created
 $ kubectl get pv
 NAME CAPACITY ACCESSMODES RECLAIMPOLICY STATUS
 CLAIM STORAGECLASS REASON AGE
-pvvol-1 1Gi RWX Retain Available 4s
+pv-1 1Gi RWX Retain Available 4s
 ```
 
 ## Creating a Persistent Volume Claim (PVC)
@@ -122,11 +107,11 @@ No resources found.
 2. Create a YAML file for the new pvc.
 
 ```yaml
-$ vim pvc.yaml
+$ vim pvc-1.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-one
+  name: pvc-1
 spec:
   accessModes:
   - ReadWriteMany
@@ -138,11 +123,11 @@ spec:
 3. Create and verify the new pvc is bound. Note that the size is 1Gi, even though 200Mi was suggested. Only a volume of at least that size could be used.
 
 ```
-$ kubectl create -f pvc.yaml
-persistentvolumeclaim/pvc-one created
+$ kubectl apply -f pvc-1.yaml
+persistentvolumeclaim/pvc-1 created
 $ kubectl get pvc
 NAME STATUS VOLUME CAPACITY ACCESSMODES STORAGECLASS AGE
-pvc-one Bound pvvol-1 1Gi RWX 4s
+pvc-1 Bound pv-1 1Gi RWX 4s
 ```
 
 4. Look at the status of the pv again, to determine if it is in use. It should show a status of Bound.
@@ -150,13 +135,13 @@ pvc-one Bound pvvol-1 1Gi RWX 4s
 ```
 $ kubectl get pv
 NAME CAPACITY ACCESSMODES RECLAIMPOLICY STATUS CLAIM STORAGECLASS REASON AGE
-pvvol-1 1Gi RWX Retain Bound default/pvc-one 5m
+pv-1 1Gi RWX Retain Bound default/pvc-1 5m
 ```
 
 5. Create a new deployment to use the pvc. We will copy and edit an existing deployment yaml file. We will change the deployment name then add a volumeMounts section under containers and volumes section to the general spec. The name used must match in both places, whatever name you use. The claimName must match an existing pvc. As shown in the following example.
 
 ```yaml
-$ vim nfs-pod.yaml
+$ vim nginx-deployment-with-volume.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -164,7 +149,7 @@ metadata:
     run: nginx
   name: nginx-nfs
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       run: nginx
@@ -195,7 +180,7 @@ spec:
       volumes:                           #<<-- These four lines
       - name: nfs-vol
         persistentVolumeClaim:
-          claimName: pvc-one
+          claimName: pvc-1
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -230,7 +215,7 @@ Mounts:
 Volumes:
   nfs-vol:
     Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
-    ClaimName:  pvc-one
+    ClaimName:  pvc-1
     ReadOnly:   false
 <output_omitted>
 ```
@@ -240,7 +225,7 @@ Volumes:
 ```
 $ kubectl get pvc
 NAME      STATUS   VOLUME    CAPACITY   ACCESS MODES   STORAGECLASS   AGE
-pvc-one   Bound    pvvol-1   1Gi        RWX                           36m
+pvc-1   Bound    pv-1   1Gi        RWX                           36m
 ```
 
 9. check the nginx default page
@@ -253,7 +238,7 @@ kubectl get pod -o wide
 curl <POD_IP>
 
 # scale at 2
-kubectl scale deployment nginx-nfs --replicas=3
+kubectl scale deployment nginx-nfs --replicas=2
 
 # check IP of the new pod
 curl <POD_2_IP>
@@ -269,10 +254,10 @@ The flexibility of cloud-based storage often requires limiting consumption among
 ```
 $ kubectl delete deploy nginx-nfs
 deployment.extensions "nginx-nfs" deleted
-$ kubectl delete pvc pvc-one
-persistentvolumeclaim "pvc-one" deleted
-$ kubectl delete pv pvvol-1
-persistentvolume "pvvol-1" deleted
+$ kubectl delete pvc pvc-1
+persistentvolumeclaim "pvc-1" deleted
+$ kubectl delete pv pv-1
+persistentvolume "pv-1" deleted
 ```
 
 2. Create a yaml file for the ResourceQuota object. Set the storage limit to ten claims with a total usage of 500Mi.
@@ -307,9 +292,9 @@ No resource limits.
 
 ```
 $ kubectl create -f PVol.yaml -n small
-persistentvolume/pvvol-1 created
+persistentvolume/pv-1 created
 $ kubectl create -f pvc.yaml -n small
-persistentvolumeclaim/pvc-one created
+persistentvolumeclaim/pvc-1 created
 ```
 
 5. Create the new resource quota, placing this object into the low-usage-limit namespace.
@@ -449,19 +434,19 @@ requests.storage 200Mi 500Mi
 ```sh
 $ kubectl get pvc -n small
 NAME STATUS VOLUME CAPACITY ACCESSMODES STORAGECLASS AGE
-pvc-one Bound pvvol-1 1Gi RWX 19m
-$ kubectl -n small delete pvc pvc-one
-persistentvolumeclaim "pvc-one" deleted
+pvc-1 Bound pv-1 1Gi RWX 19m
+$ kubectl -n small delete pvc pvc-1
+persistentvolumeclaim "pvc-1" deleted
 $ kubectl -n small get pv
 NAME CAPACITY ACCESSMODES RECLAIMPOLICY STATUS CLAIM
 STORAGECLASS REASON AGE
-pvvol-1 1Gi RWX Retain Released small/pvc-one 44m
+pv-1 1Gi RWX Retain Released small/pvc-1 44m
 ```
 
 17. Dynamically provisioned storage uses the ReclaimPolicy of the StorageClass which could be Delete, Retain, or some types allow Recycle. Manually created persistent volumes default to Retain unless set otherwise at creation. The default storage policy is to retain the storage to allow recovery of any data. To change this begin by viewing the yaml output.
 
 ```
-$ kubectl get pv/pvvol-1 -o yaml
+$ kubectl get pv/pv-1 -o yaml
 ....
 path: /opt/nfs-k8s-pv
 server: lfs458-node-1a0a
@@ -473,24 +458,24 @@ phase: Released
 18. Currently we will need to delete and re-create the object. Future development on a deleter plugin is planned. We will re-create the volume and allow it to use the Retain policy, then change it once running.
 
 ```
-$ kubectl delete pv/pvvol-1
-persistentvolume "pvvol-1" deleted
+$ kubectl delete pv/pv-1
+persistentvolume "pv-1" deleted
 $ grep Retain PVol.yaml
 persistentVolumeReclaimPolicy: Retain
 $ kubectl create -f PVol.yaml
-persistentvolume "pvvol-1" created
+persistentvolume "pv-1" created
 ```
 
 19. We will use kubectl patch to change the retention policy to Delete. The yaml output from before can be helpful in getting the correct syntax.
 
 ```
-$ kubectl patch pv pvvol-1 -p \
+$ kubectl patch pv pv-1 -p \
 '{"spec":{"persistentVolumeReclaimPolicy":"Delete"}}'
-persistentvolume/pvvol-1 patched
-$ kubectl get pv/pvvol-1
+persistentvolume/pv-1 patched
+$ kubectl get pv/pv-1
 NAME CAPACITY ACCESSMODES RECLAIMPOLICY STATUS CLAIM
 STORAGECLASS REASON AGE
-pvvol-1 1Gi RWX Delete Available 2m
+pv-1 1Gi RWX Delete Available 2m
 ```
 
 20. View the current quota settings.
@@ -505,7 +490,7 @@ requests.storage 0 500Mi
 
 ```
 $ kubectl -n small create -f pvc.yaml
-persistentvolumeclaim/pvc-one created
+persistentvolumeclaim/pvc-1 created
 $ kubectl describe ns small
 .
 requests.storage 200Mi 500Mi
@@ -567,8 +552,8 @@ nginx-nfs-2854978848-vb6bh 1/1 Running 0 58s
 ```
 $ kubectl -n small delete deploy nginx-nfs
 deployment.extensions "nginx-nfs" deleted
-$ kubectl -n small delete pvc/pvc-one
-persistentvolumeclaim "pvc-one" deleted
+$ kubectl -n small delete pvc/pvc-1
+persistentvolumeclaim "pvc-1" deleted
 ```
 
 28. View if the persistent volume exists. You will see it attempted a removal, but failed. If you look closer you will find the error has to do with the lack of a deleter volume plugin for NFS. Other storage protocols have a plugin.
@@ -577,13 +562,13 @@ persistentvolumeclaim "pvc-one" deleted
 $ kubectl -n small get pv
 NAME CAPACITY ACCESSMODES RECLAIMPOLICY STATUS CLAIM
 STORAGECLASS REASON AGE
-pvvol-1 1Gi RWX Delete Failed small/pvc-one 20m
+pv-1 1Gi RWX Delete Failed small/pvc-1 20m
 ```
 
 29. Ensure the deployment, pvc and pv are all removed.
 
-```$ kubectl delete pv/pvvol-1
-persistentvolume "pvvol-1" deleted
+```$ kubectl delete pv/pv-1
+persistentvolume "pv-1" deleted
 ```
 
 30. Edit the persistent volume YAML file and change the persistentVolumeReclaimPolicy: to Recycle.
@@ -619,10 +604,10 @@ Container memory - - 100Mi 500Mi -
 
 ```
 $ kubectl -n small create -f PVol.yaml
-persistentvolume/pvvol-1 created
+persistentvolume/pv-1 created
 $ kubectl get pv
 NAME CAPACITY ACCESS MODES RECLAIM POLICY STATUS ...
-pvvol-1 1Gi RWX Recycle Available ...
+pv-1 1Gi RWX Recycle Available ...
 ```
 
 34. Attempt to create the persistent volume claim again. The quota only takes effect if there is also a resource limit in effect.
@@ -630,7 +615,7 @@ pvvol-1 1Gi RWX Recycle Available ...
 ```
 $ kubectl -n small create -f pvc.yaml
 Error from server (Forbidden): error when creating "pvc.yaml":
-persistentvolumeclaims "pvc-one" is forbidden: exceeded quota:
+persistentvolumeclaims "pvc-1" is forbidden: exceeded quota:
 storagequota, requested: requests.storage=200Mi, used:
 requests.storage=0, limited: requests.storage=100Mi
 ```
@@ -654,7 +639,7 @@ persistentvolumeclaims: "10"
 
 ```
 $ kubectl -n small create -f pvc.yaml
-persistentvolumeclaim/pvc-one created
+persistentvolumeclaim/pvc-1 created
 $ kubectl -n small create -f nfs-pod.yaml
 deployment.apps/nginx-nfs created
 ```
@@ -673,25 +658,25 @@ $ kubectl -n small delete deploy nginx-nfs
 deployment.extensions "nginx-nfs" deleted
 $ kubectl get pvc -n small
 NAME STATUS VOLUME CAPACITY ACCESS MODES STORAGECLASS AGE
-pvc-one Bound pvvol-1 1Gi RWX 7m
+pvc-1 Bound pv-1 1Gi RWX 7m
 $ kubectl -n small get pv
 NAME CAPACITY ACCESS MODES RECLAIM POLICY STATUS CLAIM STORA...
-pvvol-1 1Gi RWX Recycle Bound small/pvc-one ...
+pv-1 1Gi RWX Recycle Bound small/pvc-1 ...
 ```
 
 39. Delete the pvc and check the status of the pv. It should show as Available.
 
 ```
-$ kubectl -n small delete pvc pvc-one
-persistentvolumeclaim "pvc-one" deleted
+$ kubectl -n small delete pvc pvc-1
+persistentvolumeclaim "pvc-1" deleted
 $ kubectl -n small get pv
 NAME CAPACITY ACCESS MODES RECLAIM POLICY STATUS CLAIM STORA...
-pvvol-1 1Gi RWX Recycle Available ...
+pv-1 1Gi RWX Recycle Available ...
 ```
 
 40. Remove the pv and any other resources created during this lab.
 
 ```
-$ kubectl delete pv pvvol-1
-persistentvolume "pvvol-1" deleted
+$ kubectl delete pv pv-1
+persistentvolume "pv-1" deleted
 ```

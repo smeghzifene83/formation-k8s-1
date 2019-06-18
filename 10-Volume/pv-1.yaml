@@ -10,5 +10,5 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   nfs:
     path: /opt/nfs-k8s-pv
-    server: 192.169.32.20   #<-- Edit to match master node
+    server: 192.169.32.20   #<-- Edit to match master node  (private IP for AWS)
     readOnly: false

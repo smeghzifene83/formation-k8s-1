@@ -5,7 +5,7 @@ metadata:
     run: nginx
   name: nginx-nfs
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       run: nginx
@@ -16,7 +16,6 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      creationTimestamp: null
       labels:
         run: nginx
     spec:
@@ -36,7 +35,7 @@ spec:
       volumes:                           #<<-- These four lines
       - name: nfs-vol
         persistentVolumeClaim:
-          claimName: pvc-one
+          claimName: pvc-1
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
