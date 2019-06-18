@@ -4,7 +4,11 @@ metadata:
   name: docker-demo-ingress
 spec:
   rules:
-  - host: docker-demo-ingress.192.169.32.21.xip.io
+  # utilisation de xip.io pour simuler un wildcard DNS (see http://xip.io)
+  # remplacer XX.XX.XX.XX par l'ip d'un worker
+    # 192.169.32.21 ou 192.169.32.22 pour un déploiement sur Vagrant
+    # l'adresse IP PUBLIC pour un déploiement cloud
+  - host: docker-demo-ingress.52.47.196.15.xip.io
     http:
       paths:
       - path: /
