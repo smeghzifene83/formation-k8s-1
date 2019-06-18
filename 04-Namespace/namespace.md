@@ -45,6 +45,7 @@ $ kubectl config view | grep namespace
 
 4/ Supprimer un namespace :
 ```bash
+$ kubectl config set-context $(kubectl config current-context) --namespace=default
 $ kubectl delete namespace tst
 ```
  
