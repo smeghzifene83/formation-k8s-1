@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: docker-demo
-        image: dmaumenee/docker-demo:1.0
+        image: dmaumenee/docker-demo:2.0
         ports:
         - containerPort: 8080
           name: docker-demo
@@ -25,5 +25,3 @@ spec:
           value: "Formation Kubernetes"
         - name: SHOW_VERSION
           value: "true"
-        - name: VERSION
-          value: "2.0"
