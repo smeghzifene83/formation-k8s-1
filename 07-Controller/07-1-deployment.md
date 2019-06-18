@@ -90,6 +90,7 @@ kubectl apply -f docker-demo-deployment.yaml
 2. Affichage des détails
 
 ```sh
+kubectl get all --show-labels
 kubectl describe deployment docker-demo
 kubectl get all --selector=app=docker-demo -o wide
 ```
@@ -97,6 +98,12 @@ kubectl get all --selector=app=docker-demo -o wide
 3. Accès aux pods
 
 ```sh
+
+# depuis un pod
+kubectl exec -it docker-demo-XXXX-YYYY sh
+wget -qO- localhost:8080/ping
+
+# depuis une machine du cluster
 curl <IP-POD-1>:8080/ping
 {"instance":"docker-demo-99cf445b64-q7yqd","version":"1.0"}
 curl <IP-POD-2>:8080/ping

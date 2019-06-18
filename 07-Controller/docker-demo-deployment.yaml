@@ -25,5 +25,3 @@ spec:
           value: "Formation Kubernetes"
         - name: SHOW_VERSION
           value: "true"
-        - name: VERSION
-          value: "1.0"
