@@ -5,8 +5,8 @@ metadata:
 spec:
   rules:
   # utilisation de xip.io pour simuler un wildcard DNS (see http://xip.io)
-  # remplacer XX.XX.XX.XX par l'ip d'un worker
-    # 192.169.32.21 ou 192.169.32.22 pour un déploiement sur Vagrant
+  # remplacer XX.XX.XX.XX par l'ip serveur sur lequel tourne le HAP proxy (la VM master)
+    # 192.169.32.20
     # l'adresse IP PUBLIC pour un déploiement cloud
   - host: docker-demo-ingress.XX.XX.XX.XX.xip.io
     http:
